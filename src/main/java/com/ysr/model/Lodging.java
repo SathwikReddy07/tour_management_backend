@@ -1,0 +1,83 @@
+package com.ysr.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "lodgings")
+public class Lodging {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String name;
+    private String type;
+    private String description;
+    private String address;
+    private Double rating;
+
+    public Lodging() {}
+
+    public Lodging(String name, String type, String description, String address, Double rating) {
+        this.name = name;
+        this.type = type;
+        this.description = description;
+        this.address = address;
+        this.rating = rating;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    @Override
+    public String toString() {
+        return "Lodging{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", description='" + description + '\'' +
+                ", address='" + address + '\'' +
+                ", rating=" + rating +
+                '}';
+    }
+
+}
