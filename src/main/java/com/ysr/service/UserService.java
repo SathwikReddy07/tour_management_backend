@@ -3,10 +3,17 @@ package com.ysr.service;
 import com.ysr.model.Users;
 import com.ysr.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
+
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     private UserRepo userRepo;
     @Autowired
@@ -26,6 +33,7 @@ public class UserService {
         if (userRepo.existsByPhone(user.getPhone())) {
             throw new RuntimeException("Phone number already exists");
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepo.save(user);
     }
 
@@ -34,7 +42,7 @@ public class UserService {
         if (user == null) {
             throw new RuntimeException("No user found with the email " + email);
         }
-        if (!user.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
         return user;
@@ -45,7 +53,7 @@ public class UserService {
         if (user == null) {
             throw new RuntimeException("No user found with the phone number " + phone);
         }
-        if (!user.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
         return user;
