@@ -1,5 +1,6 @@
 package com.ysr.service;
 
+import com.ysr.exception.LocationNotFoundException;
 import com.ysr.model.Location;
 import com.ysr.repository.LocationRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class LocationService {
 
     public Location getLocationById(Integer id) {
         return locationRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Location not found with id: " + id));
+                .orElseThrow(() -> new LocationNotFoundException("Location not found with id: " + id));
     }
 
     public List<Location> getAllLocations() {
@@ -31,7 +32,7 @@ public class LocationService {
 
     public Location updateLocation(Integer id, Location location) {
         Location existingLocation = locationRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Location not found with id: " + id));
+                .orElseThrow(() -> new LocationNotFoundException("Location not found with id: " + id));
         existingLocation.setFromLocation(location.getFromLocation());
         existingLocation.setToLocation(location.getToLocation());
         existingLocation.setCountry(location.getCountry());
@@ -43,7 +44,7 @@ public class LocationService {
 
     public void deleteLocation(Integer id) {
         if (!locationRepo.existsById(id)) {
-            throw new RuntimeException("Location not found with id: " + id);
+            throw new LocationNotFoundException("Location not found with id: " + id);
         }
         locationRepo.deleteById(id);
     }

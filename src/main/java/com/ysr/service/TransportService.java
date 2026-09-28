@@ -1,5 +1,6 @@
 package com.ysr.service;
 
+import com.ysr.exception.TransportNotFoundException;
 import com.ysr.model.Transport;
 import com.ysr.repository.TransportRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class TransportService {
 
     public Transport getTransportById(Integer id) {
         return transportRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transport not found with id: " + id));
+                .orElseThrow(() -> new TransportNotFoundException("Transport not found with id: " + id));
     }
 
     public List<Transport> getAllTransports() {
@@ -31,7 +32,7 @@ public class TransportService {
 
     public Transport updateTransport(Integer id, Transport transport) {
         Transport existingTransport = transportRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transport not found with id: " + id));
+                .orElseThrow(() -> new TransportNotFoundException("Transport not found with id: " + id));
         existingTransport.setName(transport.getName());
         existingTransport.setType(transport.getType());
         existingTransport.setEstimatedTime(transport.getEstimatedTime());
@@ -41,7 +42,7 @@ public class TransportService {
 
     public void deleteTransport(Integer id) {
         if (!transportRepo.existsById(id)) {
-            throw new RuntimeException("Transport not found with id: " + id);
+            throw new TransportNotFoundException("Transport not found with id: " + id);
         }
         transportRepo.deleteById(id);
     }

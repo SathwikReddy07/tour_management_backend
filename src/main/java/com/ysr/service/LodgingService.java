@@ -1,5 +1,6 @@
 package com.ysr.service;
 
+import com.ysr.exception.LodgingNotFoundException;
 import com.ysr.model.Lodging;
 import com.ysr.repository.LodgingRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class LodgingService {
 
     public Lodging getLodgingById(Integer id) {
         return lodgingRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lodging not found with id: " + id));
+                .orElseThrow(() -> new LodgingNotFoundException("Lodging not found with id: " + id));
     }
 
     public List<Lodging> getAllLodgings() {
@@ -32,7 +33,7 @@ public class LodgingService {
 
     public Lodging updateLodging(Integer id, Lodging lodging) {
         Lodging existingLodging = lodgingRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lodging not found with id: " + id));
+                .orElseThrow(() -> new LodgingNotFoundException("Lodging not found with id: " + id));
         existingLodging.setName(lodging.getName());
         existingLodging.setType(lodging.getType());
         existingLodging.setDescription(lodging.getDescription());
@@ -43,7 +44,7 @@ public class LodgingService {
 
     public void deleteLodging(Integer id) {
         if (!lodgingRepo.existsById(id)) {
-            throw new RuntimeException("Lodging not found with id: " + id);
+            throw new LodgingNotFoundException("Lodging not found with id: " + id);
         }
         lodgingRepo.deleteById(id);
     }

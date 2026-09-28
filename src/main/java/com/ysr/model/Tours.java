@@ -3,6 +3,7 @@ package com.ysr.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,7 +27,7 @@ public class Tours {
             joinColumns = @JoinColumn(name = "tour_id")
     )
     @Column(name = "meal")
-    private List<String> meals;
+    private List<String> meals = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(
@@ -34,7 +35,7 @@ public class Tours {
             joinColumns = @JoinColumn(name = "tour_id")
     )
     @Column(name = "activity")
-    private List<String> activities;
+    private List<String> activities = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(
@@ -42,7 +43,7 @@ public class Tours {
             joinColumns = @JoinColumn(name = "tour_id")
     )
     @Column(name = "image")
-    private List<String> images;
+    private List<String> images = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "location_id", referencedColumnName = "id")

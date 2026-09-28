@@ -1,5 +1,9 @@
 package com.ysr.service;
 
+import com.ysr.exception.EmailAlreadyExistsException;
+import com.ysr.exception.InvalidCredentialsException;
+import com.ysr.exception.UserNotFoundException;
+import com.ysr.exception.PhoneNumberAlreadyExistsException;
 import com.ysr.model.Users;
 import com.ysr.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +31,11 @@ public class UserService {
         }
 
         if (userRepo.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException("Email already exists");
         }
 
         if (userRepo.existsByPhone(user.getPhone())) {
-            throw new RuntimeException("Phone number already exists");
+            throw new PhoneNumberAlreadyExistsException("Phone number already exists");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepo.save(user);
@@ -40,10 +44,10 @@ public class UserService {
     public Users loginUserByEmail(String email, String password) {
         Users user = userRepo.findByEmail(email);
         if (user == null) {
-            throw new RuntimeException("No user found with the email " + email);
+            throw new UserNotFoundException("No user found with the email " + email);
         }
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new InvalidCredentialsException("Invalid password");
         }
         return user;
     }
@@ -51,10 +55,10 @@ public class UserService {
     public Users loginUserByPhone(String phone, String password) {
         Users user = userRepo.findByPhone(phone);
         if (user == null) {
-            throw new RuntimeException("No user found with the phone number " + phone);
+            throw new UserNotFoundException("No user found with the phone number " + phone);
         }
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new InvalidCredentialsException("Invalid password");
         }
         return user;
     }
