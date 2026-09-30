@@ -4,10 +4,14 @@ import com.ysr.model.Lodging;
 import com.ysr.service.LodgingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/lodgings")
+@CrossOrigin(origins = "*")
 public class LodgingController {
 
     private LodgingService lodgingService;
@@ -17,28 +21,33 @@ public class LodgingController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addLodging(@RequestBody Lodging lodging){
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Lodging> addLodging(@RequestBody Lodging lodging){
         return ResponseEntity.ok(lodgingService.addLodging(lodging));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateLodging(@PathVariable Integer id, @RequestBody Lodging lodging) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Lodging> updateLodging(@PathVariable Integer id, @RequestBody Lodging lodging) {
         return ResponseEntity.ok(lodgingService.updateLodging(id, lodging));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteLodging(@PathVariable Integer id) {
         lodgingService.deleteLodging(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getLodgingById(@PathVariable Integer id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Lodging> getLodgingById(@PathVariable Integer id) {
         return ResponseEntity.ok(lodgingService.getLodgingById(id));
     }
 
     @GetMapping
-    public ResponseEntity<?> getLodgings() {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Lodging>> getLodgings() {
         return ResponseEntity.ok(lodgingService.getAllLodgings());
     }
 
