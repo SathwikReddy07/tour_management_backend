@@ -28,7 +28,7 @@ public class Users {
     private String phone;
 
     @NotBlank(message = "Password is mandatory")
-    @Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters")
+    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
     private String role;
