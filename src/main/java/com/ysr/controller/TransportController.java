@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin/transports")
+@PreAuthorize("hasRole('ADMIN')")
 @CrossOrigin(origins = "*")
 public class TransportController {
 
@@ -21,32 +22,32 @@ public class TransportController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Transport> addTransport(@RequestBody Transport transport){
         return ResponseEntity.ok(transportService.addTransport(transport));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Transport> updateTransport(@PathVariable Integer id, @RequestBody Transport transport) {
         return ResponseEntity.ok(transportService.updateTransport(id, transport));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTransport(@PathVariable Integer id) {
         transportService.deleteTransport(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Transport> getTransportById(@PathVariable Integer id) {
         return ResponseEntity.ok(transportService.getTransportById(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Transport>> getTransports() {
         return ResponseEntity.ok(transportService.getAllTransports());
     }

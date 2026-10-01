@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin/locations")
+@PreAuthorize("hasRole('ADMIN')")
 @CrossOrigin(origins = "*")
 public class LocationController {
 
@@ -21,32 +22,32 @@ public class LocationController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Location> addLocation(@RequestBody Location location){
         return ResponseEntity.ok(locationService.addLocation(location));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Location> updateLocation(@PathVariable Integer id, @RequestBody Location location){
         return ResponseEntity.ok(locationService.updateLocation(id, location));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteLocation(@PathVariable Integer id) {
         locationService.deleteLocation(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Location> getLocationById(@PathVariable Integer id) {
         return ResponseEntity.ok(locationService.getLocationById(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Location>> getLocations(){
         return ResponseEntity.ok(locationService.getAllLocations());
     }

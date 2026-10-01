@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin/lodgings")
+@PreAuthorize("hasRole('ADMIN')")
 @CrossOrigin(origins = "*")
 public class LodgingController {
 
@@ -21,32 +22,32 @@ public class LodgingController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Lodging> addLodging(@RequestBody Lodging lodging){
         return ResponseEntity.ok(lodgingService.addLodging(lodging));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Lodging> updateLodging(@PathVariable Integer id, @RequestBody Lodging lodging) {
         return ResponseEntity.ok(lodgingService.updateLodging(id, lodging));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteLodging(@PathVariable Integer id) {
         lodgingService.deleteLodging(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Lodging> getLodgingById(@PathVariable Integer id) {
         return ResponseEntity.ok(lodgingService.getLodgingById(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Lodging>> getLodgings() {
         return ResponseEntity.ok(lodgingService.getAllLodgings());
     }
