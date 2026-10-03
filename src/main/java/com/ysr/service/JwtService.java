@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class JwtService {
         this.userRepo = userRepo;
     }
 
-    private static final String SECRET_KEY = "jDEcS4DcezpQPhJriwhRCON9USQa644GVGfXfJn3qBF";
+    @Value("${jwt.secret-key}") private String SECRET_KEY;
     private String secret;
 
     public String generateSecretKey() throws NoSuchAlgorithmException {
@@ -42,7 +43,7 @@ public class JwtService {
     }
 
     private Key getKey() {
-        byte[] decodedKey = Base64.getDecoder().decode(secret);
+        byte[] decodedKey = Base64.getDecoder().decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(decodedKey);
     }
 
