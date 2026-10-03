@@ -20,22 +20,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepo = userRepo;
     }
 
-    private String loginType;
-    public CustomUserDetailsService() {
-        this.loginType = "EMAIL";
-    }
-
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users u1 = userRepo.findByEmail(username);
-        Users u2 = userRepo.findByPhone(username);
-        if (u1 == null && u2 == null) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
-        } else if (u1 != null) {
-            return new UserPrincipal(u1, "EMAIL");
-        } else {
-            return new UserPrincipal(u2, "PHONE");
-        }
+        Users user = userRepo.findByEmail(username);
+        if (user == null)
+            throw new UsernameNotFoundException("User not found with email: " + username);
+        return new UserPrincipal(user);
     }
 }
