@@ -12,10 +12,8 @@ import java.util.List;
 public class UserPrincipal implements UserDetails {
 
     private Users user;
-    private String loginType;
-    public UserPrincipal(Users user, String loginType) {
+    public UserPrincipal(Users user) {
         this.user = user;
-        this.loginType = loginType;
     }
 
     @Override
@@ -34,13 +32,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        if(loginType.equalsIgnoreCase("EMAIL")) {
-            return user.getEmail();
-        }
-        else if (loginType.equalsIgnoreCase("PHONE")) {
-            return user.getPhone();
-        }
-        throw new RuntimeException("Invalid login type");
+        return user.getEmail();
     }
 
     @Override
