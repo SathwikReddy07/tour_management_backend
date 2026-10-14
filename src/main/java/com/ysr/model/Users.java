@@ -1,6 +1,6 @@
 package com.ysr.model;
 
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,17 +20,20 @@ public class Users {
     private String name;
 
     @Email(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$", message = "Invalid email format")
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Pattern(regexp = "^[0-9]{10}$", message = "Invalid phone number format")
+    @Pattern(regexp = "^[6-9][0-9]{9}$", message = "Invalid phone number format")
     @Column(unique = true)
     private String phone;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank(message = "Password is mandatory")
     @Size(min = 8, message = "Password must be at least 8 characters")
+    @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
     private String role;
 
     public Users() {}
@@ -83,18 +86,6 @@ public class Users {
     }
     public void setRole(String role) {
         this.role = role;
-    }
-
-    @Override
-    public String toString() {
-        return "Users{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
-                '}';
     }
 
 }

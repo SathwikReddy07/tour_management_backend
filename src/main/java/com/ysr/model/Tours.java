@@ -2,6 +2,7 @@ package com.ysr.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +14,25 @@ public class Tours {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(nullable = false)
     private String name;
+
     private String description;
+
+    @Column(nullable = false)
     private String guide;
+
+    @Column(nullable = false)
     private LocalDate startDate;
+
+    @Column(nullable = false)
     private LocalDate endDate;
-    private Double price;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
+
+    @Column(nullable = false)
     private Integer ticketsAvailable;
 
     @ElementCollection
@@ -45,23 +59,23 @@ public class Tours {
     @Column(name = "image")
     private List<String> images = new ArrayList<>();
 
-    @OneToOne
-    @JoinColumn(name = "location_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "location_id", referencedColumnName = "id", nullable = false)
     private Location location;
 
-    @OneToOne
-    @JoinColumn(name = "lodging_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "lodging_id", referencedColumnName = "id", nullable = false)
     private Lodging lodging;
 
-    @OneToOne
-    @JoinColumn(name = "transport_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "transport_id", referencedColumnName = "id", nullable = false)
     private Transport transport;
 
     public Tours() {
     }
 
     public Tours(String name, String description, String guide, LocalDate startDate, LocalDate endDate,
-                 Double price, Integer ticketsAvailable, List<String> meals, List<String> activities, List<String> images,
+                 BigDecimal price, Integer ticketsAvailable, List<String> meals, List<String> activities, List<String> images,
                  Location location, Lodging lodging, Transport transport) {
         this.name = name;
         this.description = description;
@@ -120,10 +134,10 @@ public class Tours {
         this.endDate = endDate;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -174,26 +188,6 @@ public class Tours {
     }
     public void setTransport(Transport transport) {
         this.transport = transport;
-    }
-
-    @Override
-    public String toString() {
-        return "Tours{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", guide='" + guide + '\'' +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", price=" + price +
-                ", ticketsAvailable=" + ticketsAvailable +
-                ", meals=" + meals +
-                ", activities=" + activities +
-                ", images=" + images +
-                ", location=" + location +
-                ", lodging=" + lodging +
-                ", transport=" + transport +
-                '}';
     }
 
 }

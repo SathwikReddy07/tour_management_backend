@@ -2,7 +2,8 @@ package com.ysr.model;
 
 import jakarta.persistence.*;
 
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
@@ -20,52 +21,53 @@ public class Bookings {
     @JoinColumn(name = "tour_id", referencedColumnName = "id", nullable = false)
     private Tours tour;
 
+    @Column(nullable = false)
     private Integer noOfTickets;
-    private Double price;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
 
     public enum PaymentStatus {
         COMPLETED,
         PENDING,
-        FAILED
+        FAILED,
+        CANCELLED,
+        EXPIRED
     }
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
-    private Date bookingDate;
+    @Column(nullable = false)
+    private LocalDateTime bookingDateTime;
+
+    @Column(nullable = false)
+    private LocalDateTime expiresAt;
+
+    @Column(nullable = false)
     private Boolean ticketIssued;
+
+    @Column(unique = true)
     private String transactionId;
 
-    public Boolean checkAvailability() {
-        return tour.getTicketsAvailable() >= noOfTickets;
-    }
-
-    public void confirmBooking() {
-        if (paymentStatus == PaymentStatus.COMPLETED && checkAvailability()) {
-            tour.setTicketsAvailable(tour.getTicketsAvailable() - noOfTickets);
-            ticketIssued = true;
-        } else {
-            ticketIssued = false;
-        }
-    }
-
-    public void handlePaymentFailure() {
-        paymentStatus = PaymentStatus.FAILED;
-        ticketIssued = false;
-    }
+    @Column(unique = true)
+    private String razorpayOrderId;
 
     public Bookings() {}
 
-    public Bookings(Users customer, Tours tour, Integer noOfTickets, Double price, PaymentStatus paymentStatus,
-                    Date bookingDate, Boolean ticketIssued, String transactionId) {
+    public Bookings(Users customer, Tours tour, Integer noOfTickets, BigDecimal price, PaymentStatus paymentStatus,
+                    LocalDateTime bookingDateTime, LocalDateTime expiresAt, Boolean ticketIssued, String transactionId, String razorpayOrderId) {
         this.customer = customer;
         this.tour = tour;
         this.noOfTickets = noOfTickets;
         this.price = price;
         this.paymentStatus = paymentStatus;
-        this.bookingDate = bookingDate;
+        this.bookingDateTime = bookingDateTime;
+        this.expiresAt = expiresAt;
         this.ticketIssued = ticketIssued;
         this.transactionId = transactionId;
+        this.razorpayOrderId = razorpayOrderId;
     }
 
     public Long getBookingId() {
@@ -96,10 +98,10 @@ public class Bookings {
         this.noOfTickets = noOfTickets;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -110,11 +112,18 @@ public class Bookings {
         this.paymentStatus = paymentStatus;
     }
 
-    public Date getBookingDate() {
-        return bookingDate;
+    public LocalDateTime getBookingDateTime() {
+        return bookingDateTime;
     }
-    public void setBookingDate(Date bookingDate) {
-        this.bookingDate = bookingDate;
+    public void setBookingDateTime(LocalDateTime bookingDateTime) {
+        this.bookingDateTime = bookingDateTime;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
     public Boolean getTicketIssued() {
@@ -131,19 +140,11 @@ public class Bookings {
         this.transactionId = transactionId;
     }
 
-    @Override
-    public String toString() {
-        return "Bookings{" +
-                "bookingId=" + bookingId +
-                ", customer=" + customer +
-                ", tour=" + tour +
-                ", noOfTickets=" + noOfTickets +
-                ", price=" + price +
-                ", paymentStatus=" + paymentStatus +
-                ", bookingDate=" + bookingDate +
-                ", ticketIssued=" + ticketIssued +
-                ", transactionId='" + transactionId + '\'' +
-                '}';
+    public String getRazorpayOrderId() {
+        return razorpayOrderId;
+    }
+    public void setRazorpayOrderId(String razorpayOrderId) {
+        this.razorpayOrderId = razorpayOrderId;
     }
 
 }

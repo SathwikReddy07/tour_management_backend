@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdminInitializer {
 
-    private UserRepo userRepo;
-    private PasswordEncoder passwordEncoder;
+    private final UserRepo userRepo;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${admin.name}")
     private String name;

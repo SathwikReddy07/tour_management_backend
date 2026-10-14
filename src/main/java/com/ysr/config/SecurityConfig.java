@@ -25,16 +25,14 @@ import java.util.Arrays;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private CustomUserDetailsService customUserDetailsService;
-    @Autowired
-    public void setCustomUserDetailsService(CustomUserDetailsService customUserDetailsService) {
-        this.customUserDetailsService = customUserDetailsService;
-    }
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtFilter jwtFilter;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    private JwtFilter jwtFilter;
-    @Autowired
-    public void setJwtFilter(JwtFilter jwtFilter) {
+    public SecurityConfig (CustomUserDetailsService customUserDetailsService, JwtFilter jwtFilter, OAuth2SuccessHandler oAuth2SuccessHandler) {
+        this.customUserDetailsService = customUserDetailsService;
         this.jwtFilter = jwtFilter;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
@@ -48,11 +46,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(
                                 "/auth/signup",
-                                "/auth/login"
+                                "/auth/login",
+                                "/oauth2/**",
+                                "/login/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/admin/**"
@@ -61,6 +61,9 @@ public class SecurityConfig {
                                 "/user/**"
                         ).hasRole("CUSTOMER")
                         .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2SuccessHandler)
+                )
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {

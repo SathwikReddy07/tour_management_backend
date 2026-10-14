@@ -4,63 +4,53 @@ import com.ysr.exception.LocationNotFoundException;
 import com.ysr.exception.LodgingNotFoundException;
 import com.ysr.exception.TourNotFoundException;
 import com.ysr.exception.TransportNotFoundException;
-import com.ysr.model.Location;
-import com.ysr.model.Lodging;
-import com.ysr.model.Tours;
-import com.ysr.model.Transport;
-import com.ysr.repository.LocationRepo;
-import com.ysr.repository.LodgingRepo;
-import com.ysr.repository.TourRepo;
-import com.ysr.repository.TransportRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ysr.model.*;
+import com.ysr.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class TourService {
 
-    private TourRepo tourRepo;
-    @Autowired
-    public void setTourRepo(TourRepo tourRepo) {
+    private final TourRepo tourRepo;
+    private final LocationRepo locationRepo;
+    private final LodgingRepo lodgingRepo;
+    private final TransportRepo transportRepo;
+    private final BookingRepo bookingRepo;
+    private final CloudinaryService cloudinaryService;
+
+    public TourService(TourRepo tourRepo, LocationRepo locationRepo, LodgingRepo lodgingRepo,
+                       TransportRepo transportRepo, BookingRepo bookingRepo, CloudinaryService cloudinaryService) {
         this.tourRepo = tourRepo;
-    }
-
-    private LocationRepo locationRepo;
-    @Autowired
-    public void setLocationRepo(LocationRepo locationRepo) {
         this.locationRepo = locationRepo;
-    }
-
-    private LodgingRepo lodgingRepo;
-    @Autowired
-    public void setLodgingRepo(LodgingRepo lodgingRepo) {
         this.lodgingRepo = lodgingRepo;
-    }
-
-    private TransportRepo transportRepo;
-    @Autowired
-    public void setTransportRepo(TransportRepo transportRepo) {
         this.transportRepo = transportRepo;
-    }
-
-    private CloudinaryService cloudinaryService;
-    @Autowired
-    public void setCloudinaryService(CloudinaryService cloudinaryService) {
+        this.bookingRepo = bookingRepo;
         this.cloudinaryService = cloudinaryService;
+
     }
 
+    @Transactional
     public Tours addTour(Tours tour, List<MultipartFile> images,
-                         Integer locationId, Integer transportId, Integer lodgingId) throws IOException {
+                         Integer locationId, Integer lodgingId, Integer transportId) throws IOException {
         Location location = locationRepo.findById(locationId)
                 .orElseThrow(() -> new LocationNotFoundException("Location not found with id: " + locationId));
         Lodging lodging = lodgingRepo.findById(lodgingId)
                 .orElseThrow(() -> new LodgingNotFoundException("Lodging not found with id: " + lodgingId));
         Transport transport = transportRepo.findById(transportId)
                 .orElseThrow(() -> new TransportNotFoundException("Transport not found with id: " + transportId));
+        if (tour.getStartDate() == null || tour.getEndDate() == null) {
+            throw new IllegalArgumentException("Start date and end date cannot be null");
+        }
+        if (tour.getEndDate().isBefore(tour.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
         List<String> imageUrls = new ArrayList<>();
         for (MultipartFile image : images) {
             if (image.isEmpty()) {
@@ -90,12 +80,17 @@ public class TourService {
     public void deleteTourById(Integer tourId) {
         Tours tour = tourRepo.findById(tourId)
                 .orElseThrow(() -> new TourNotFoundException("Tour not found with id: " + tourId));
+        List<Bookings> bookings = bookingRepo.findByTourId(tourId);
+        if (!(bookings == null || bookings.isEmpty())) {
+            throw new IllegalStateException("Cannot delete tour with id: " + tourId + " because it has associated bookings.");
+        }
         tourRepo.delete(tour);
     }
 
+    @Transactional
     public Tours updateTourById(Integer tourId, Tours tour, List<MultipartFile> images,
-                                Integer locationId, Integer transportId, Integer lodgingId) throws IOException {
-        Tours existingTour = tourRepo.findById(tourId)
+                                Integer locationId, Integer lodgingId, Integer transportId) throws IOException {
+        Tours existingTour = tourRepo.findByIdForUpdate(tourId)
                 .orElseThrow(() -> new TourNotFoundException("Tour not found with id: " + tourId));
         Location location = locationRepo.findById(locationId)
                 .orElseThrow(() -> new LocationNotFoundException("Location not found with id: " + locationId));
@@ -103,6 +98,12 @@ public class TourService {
                 .orElseThrow(() -> new LodgingNotFoundException("Lodging not found with id: " + lodgingId));
         Transport transport = transportRepo.findById(transportId)
                 .orElseThrow(() -> new TransportNotFoundException("Transport not found with id: " + transportId));
+        if (tour.getStartDate() == null || tour.getEndDate() == null) {
+            throw new IllegalArgumentException("Start date and end date cannot be null");
+        }
+        if (tour.getEndDate().isBefore(tour.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
         List<String> imageUrls = new ArrayList<>();
         if (images == null || images.isEmpty()) {
             imageUrls = existingTour.getImages();
@@ -114,6 +115,9 @@ public class TourService {
                 String imageUrl = cloudinaryService.uploadImage(image);
                 imageUrls.add(imageUrl);
             }
+            for (String imageUrl : existingTour.getImages()) {
+                cloudinaryService.deleteImage(imageUrl);
+            }
         }
         existingTour.setName(tour.getName());
         existingTour.setDescription(tour.getDescription());
@@ -121,7 +125,6 @@ public class TourService {
         existingTour.setStartDate(tour.getStartDate());
         existingTour.setEndDate(tour.getEndDate());
         existingTour.setPrice(tour.getPrice());
-        existingTour.setTicketsAvailable(tour.getTicketsAvailable());
         existingTour.setMeals(tour.getMeals());
         existingTour.setActivities(tour.getActivities());
         existingTour.setImages(imageUrls);
@@ -129,6 +132,23 @@ public class TourService {
         existingTour.setLodging(lodging);
         existingTour.setTransport(transport);
         return tourRepo.save(existingTour);
+    }
+
+    public List<Tours> getToursWithFilters(String country, String lodgingType, String transportType,
+                                           BigDecimal minPrice, BigDecimal maxPrice) {
+        if (country != null && country.isBlank())
+            country = null;
+        if (lodgingType != null && lodgingType.isBlank())
+            lodgingType = null;
+        if (transportType != null && transportType.isBlank())
+            transportType = null;
+        if (minPrice != null && minPrice.compareTo(BigDecimal.ZERO) < 0)
+            minPrice = null;
+        if (maxPrice != null && maxPrice.compareTo(BigDecimal.ZERO) < 0)
+            maxPrice = null;
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0)
+            throw new IllegalArgumentException("Min price cannot be greater than max price");
+        return tourRepo.filterTours(country, lodgingType, transportType, minPrice, maxPrice);
     }
 
 }

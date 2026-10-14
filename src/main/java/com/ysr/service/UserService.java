@@ -15,22 +15,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepo userRepo;
 
-    private UserRepo userRepo;
-    @Autowired
-    public void setUserRepo(UserRepo userRepo) {
+    public UserService (
+            PasswordEncoder passwordEncoder,
+            UserRepo userRepo
+    ) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepo = userRepo;
     }
 
     public void registerUser(Users user) {
-        if (user.getRole() == null || user.getRole().isEmpty()) {
-            user.setRole("ROLE_CUSTOMER");
-        }
+        user.setRole("ROLE_CUSTOMER");
 
         if (userRepo.existsByEmail(user.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");

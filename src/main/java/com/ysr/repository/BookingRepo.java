@@ -1,12 +1,16 @@
 package com.ysr.repository;
 
 import com.ysr.model.Bookings;
-import com.ysr.model.Tours;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepo extends JpaRepository<Bookings, Long> {
 
@@ -18,18 +22,23 @@ public interface BookingRepo extends JpaRepository<Bookings, Long> {
 
     List<Bookings> findByTourIdAndPaymentStatus(Integer tourId, Bookings.PaymentStatus paymentStatus);
 
-    @Query("SELECT t FROM Tours t WHERE " +
-            "(:country IS NULL OR t.location.country = :country) AND " +
-            "(:lodgingType IS NULL OR t.lodging.type = :lodgingType) AND " +
-            "(:transportationType IS NULL OR t.transport.type = :transportationType) AND " +
-            "(:minPrice IS NULL OR t.price >= :minPrice) AND " +
-            "(:maxPrice IS NULL OR t.price <= :maxPrice)")
-    List<Tours> filterTours(
-            @Param("country") String country,
-            @Param("lodgingType") String lodgingType,
-            @Param("transportationType") String transportationType,
-            @Param("minPrice") Double minPrice,
-            @Param("maxPrice") Double maxPrice
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM Bookings b WHERE b.bookingId = :id")
+    Optional<Bookings> findByIdForUpdate(@Param("id") Long id);
+
+    @Query("SELECT SUM(b.price) FROM Bookings b WHERE b.tour.id = :tourId AND b.paymentStatus = :paymentStatus")
+    BigDecimal getTotalRevenueByTourIdAndPaymentStatus(
+            @Param("tourId") Integer tourId,
+            @Param("paymentStatus") Bookings.PaymentStatus paymentStatus
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM Bookings b WHERE b.paymentStatus = :status AND b.expiresAt < :time")
+    List<Bookings> findExpiredBookingsForUpdate(
+            @Param("status") Bookings.PaymentStatus status,
+            @Param("time") LocalDateTime time
+    );
+
+    List<Bookings> findByTourId(Integer tourId);
 
 }
